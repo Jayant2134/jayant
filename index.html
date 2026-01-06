@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AcadeLink - Academic Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .stat-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card.pending .stat-icon { color: #ff6b6b; }
+        .stat-card.completed .stat-icon { color: #51cf66; }
+        .stat-card.upcoming .stat-icon { color: #ffd43b; }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        /* Main Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            height: 100%;
+        }
+
+        .card h3 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Notice Board */
+        .notice-item {
+            background: linear-gradient(135deg, #f7fafc, #edf2f7);
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .notice-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .notice-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .notice-meta {
+            font-size: 14px;
+            color: #718096;
+            display: flex;
+            gap: 15px;
+        }
+
+        .notice-summary {
+            margin-top: 8px;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        /* Assignment Tracker */
+        .assignment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .assignment-item:hover {
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .assignment-info h4 {
+            margin-bottom: 5px;
+            color: #2d3748;
+        }
+
+        .assignment-meta {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .assignment-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .status-checkbox.checked {
+            background: #51cf66;
+            border-color: #51cf66;
+        }
+
+        .status-checkbox.checked i {
+            color: white;
+            font-size: 12px;
+        }
+
+        .deadline-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .deadline-urgent { background: #fed7d7; color: #c53030; }
+        .deadline-soon { background: #feebc8; color: #c05621; }
+        .deadline-normal { background: #c6f6d5; color: #22543d; }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #51cf66, #48bb78);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Faculty Directory */
+        .faculty-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .faculty-card {
+            text-align: center;
+            padding: 20px 15px;
+        }
+
+        .faculty-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .faculty-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .faculty-subject {
+            color: #718096;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        /* AI Chatbot */
+        .ai-chat {
+            grid-column: 1 / -1;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding-right: 10px;
+        }
+
+        .chat-message {
+            margin-bottom: 12px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+        }
+
+        .message-ai {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-user {
+            background: #f7fafc;
+            color: #2d3748;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .chat-input button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+
+        .chat-input button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Search & Filter */
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            background: white;
+        }
+
+        .search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i> AcadeLink
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">RS</div>
+                <span>Rahul Sharma <br> <small>2nd Year CSE-A</small></span>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card pending">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-number">5</div>
+                <div class="stat-label">Pending Assignments</div>
+            </div>
+            <div class="stat-card completed">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-number">12</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card upcoming">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-number">3</div>
+                <div class="stat-label">Upcoming Deadlines</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Notice Board -->
+            <div class="card">
+                <h3><i class="fas fa-bullhorn"></i> Latest Notices</h3>
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search notices...">
+                </div>
+                <div class="notice-item">
+                    <div class="notice-title">Assignment Submission Extended</div>
+                    <div class="notice-meta">
+                        <span><i class="fas fa-user"></i> Dr. Sharma</span>
+                        <span><i class="fas fa-clock"></i> 2 hours ago</span>
+                    </div>
+                    <div class="notice-summary">AI Summary: DSA Assignment 2 deadline extended to Jan 10. Focus on Graph algorithms section.</div>
+                </div>
+                <div class="notice-item">
+                    <div class="notice-title">Mid-term Schedule Released</div>
+                    <div class="notice-meta">
+                        <span><i class="fas fa-user"></i> Academic Office</span>
+                        <span><i class="fas fa-clock"></i> 1 day ago</span>
+                    </div>
+                    <div class="notice-summary">AI Summary: Mid-terms start Jan 15. Check detailed schedule in Academic Calendar.</div>
+                </div>
+            </div>
+
+            <!-- Assignment Tracker -->
+            <div class="card">
+                <h3><i class="fas fa-tasks"></i> Assignment Tracker</h3>
+                <div class="progress-container">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Overall Progress</span>
+                        <span id="progress-text">72%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 72%"></div>
+                    </div>
+                </div>
+                <div class="assignment-item">
+                    <div class="assignment-info">
+                        <h4>DSA Assignment 2</h4>
+                        <div class="assignment-meta">Graph Algorithms • Due Jan 10</div>
+                    </div>
+                    <div class="assignment-status">
+                        <div class="status-checkbox" data-assignment="dsa2">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <span class="deadline-badge deadline-urgent">Urgent</span>
+                    </div>
+                </div>
+                <div class="assignment-item">
+                    <div class="assignment-info">
+                        <h4>Web Dev Project</h4>
+                        <div class="assignment-meta">React App • Due Jan 15</div>
+                    </div>
+                    <div class="assignment-status">
+                        <div class="status-checkbox" data-assignment="webdev">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <span class="deadline-badge deadline-soon">Soon</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Faculty Directory -->
+            <div class="card">
+                <h3><i class="fas fa-users"></i> Faculty Directory</h3>
+                <div class="faculty-grid">
+                    <div class="faculty-card">
+                        <div class="faculty-photo">DS</div>
+                        <div class="faculty-name">Dr. Sanjay Sharma</div>
+                        <div class="faculty-subject">Data Structures</div>
+                        <a href="tel:+919876543210" style="color: #667eea; font-size: 14px;">
+                            <i class="fas fa-phone"></i> 9876543210
+                        </a>
+                    </div>
+                    <div class="faculty-card">
+                        <div class="faculty-photo">WD</div>
+                        <div class="faculty-name">Prof. Rita Patel</div>
+                        <div class="faculty-subject">Web Development</div>
+                        <a href="tel:+919123456789" style="color: #667eea; font-size: 14px;">
+                            <i class="fas fa-phone"></i> 9123456789
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Chatbot -->
+        <div class="card ai-chat">
+            <h3><i class="fas fa-robot"></i> AI Assistant</h3>
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-message message-ai">
+                        <i class="fas fa-graduation-cap"></i> Hi! Ask me about your homework, deadlines, or anything academic!
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="What homework is pending? Next deadline?">
+                    <button onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Assignment completion tracking
+        document.querySelectorAll('.status-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('click', function() {
+                this.classList.toggle('checked');
+                updateProgress();
+            });
+        });
+
+        function updateProgress() {
+            const total = document.querySelectorAll('.status-checkbox').length;
+            const completed = document.querySelectorAll('.status-checkbox.checked').length;
+            const percentage = Math.round((completed / total) * 100);
+            
+            document.getElementById('progress-fill').style.width = percentage + '%';
+            document.getElementById('progress-text').textContent = percentage + '%';
+        }
+
+        // AI Chatbot
+        const responses = {
+            'homework': "You have 2 pending assignments: DSA Assignment 2 (due Jan 10, Urgent) and Web Dev Project (due Jan 15, Soon).",
+            'deadline': "Next deadline: DSA Assignment 2 on Jan 10. Mark as complete when submitted!",
+            'pending': "Pending: DSA Assignment 2 (Urgent), Web Dev Project (Soon). You've completed 72% of assignments this week.",
+            'notice': "Latest notice: Assignment submission extended to Jan 10. Focus on Graph algorithms.",
+            'default': "I can help with homework status, deadlines, notices, or faculty info. Try asking 'What homework is pending?'"
+        };
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim().toLowerCase();
+            const chatMessages = document.getElementById('chatMessages');
+
+            if (!message) return;
+
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-message message-user';
+            userMsg.textContent = input.value;
+            chatMessages.appendChild(userMsg);
+
+            // Generate AI response
+            setTimeout(() => {
+                let response = responses.default;
+                for (const [key, value] of Object.entries(responses)) {
+                    if (message.includes(key)) {
+                        response = value;
+                        break;
+                    }
+                }
+
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'chat-message message-ai';
+                aiMsg.innerHTML = `<i class="fas fa-magic"></i> ${response}`;
+                chatMessages.appendChild(aiMsg);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 500);
+
+            input.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Enter key support for chat
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Search functionality
+        document.querySelector('.search-input').addEventListener('input', function() {
+            // Simulate search filtering (in real app, this would filter notices)
+            console.log('Searching for:', this.value);
+        });
+    </script>
+</body>
+</html>
